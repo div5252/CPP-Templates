@@ -1,42 +1,107 @@
-#include <bits/stdc++.h>
+// Sum in 1D array
+struct FenwickTree {
+    vector<int> bit;  // binary indexed tree
+    int n;
 
-using namespace std;
-#define ll long long
-#define vll vector<ll>
+    FenwickTree(int n) {
+        this->n = n;
+        bit.assign(n, 0);
+    }
 
-#define LSOne(S) (S & (-S))
+    FenwickTree(vector<int> a) : FenwickTree(a.size()) {
+        for (size_t i = 0; i < a.size(); i++)
+            add(i, a[i]);
+    }
 
-class FenwickTree {
-private:
-  vll ft;
+    int sum(int r) {
+        int ret = 0;
+        for (; r >= 0; r = (r & (r + 1)) - 1)
+            ret += bit[r];
+        return ret;
+    }
 
-public:
-  FenwickTree() {}
-  // initialization: n + 1 zeroes, ignore index 0
-  FenwickTree(ll n) { ft.assign(n + 1, 0); }
+    int sum(int l, int r) {
+        return sum(r) - sum(l - 1);
+    }
 
-  ll rsq(ll b) {                                     // returns RSQ(1, b)
-    ll sum = 0; for (; b; b -= LSOne(b)) sum += ft[b];
-    return sum; }
-
-  ll rsq(ll a, ll b) {                              // returns RSQ(a, b)
-    return rsq(b) - (a == 1 ? 0 : rsq(a - 1)); }
-
-  // adjusts value of the k-th element by v (v can be +ve/inc or -ve/dec)
-  void adjust(ll k, ll v) {                    // note: n = ft.size() - 1
-    for (; k < (int)ft.size(); k += LSOne(k)) ft[k] += v; }
+    void add(int idx, int delta) {
+        for (; idx < n; idx = idx | (idx + 1))
+            bit[idx] += delta;
+    }
 };
 
-int main() {
-    int f[] = { 2,4,5,5,6,6,6,7,7,8,9 }; // m = 11 scores
-    FenwickTree ft(10); // declare a Fenwick Tree for range [1..10]
-    // insert these scores manually one by one into an empty Fenwick Tree
-    for (int i = 0; i < 11; i++) ft.adjust(f[i], 1); // this is O(k log n)
-    printf("%d\n", ft.rsq(1, 1)); // 0 => ft[1] = 0
-    printf("%d\n", ft.rsq(1, 2)); // 1 => ft[2] = 1
-    printf("%d\n", ft.rsq(1, 6)); // 7 => ft[6] + ft[4] = 5 + 2 = 7
-    printf("%d\n", ft.rsq(1, 10)); // 11 => ft[10] + ft[8] = 1 + 10 = 11
-    printf("%d\n", ft.rsq(3, 6)); // 6 => rsq(1, 6) - rsq(1, 2) = 7 - 1
-    ft.adjust(5, 2); // update demo
-    printf("%d\n", ft.rsq(1, 10)); // now 13
-} // return 0;
+struct FenwickTreeOneBasedIndexing {
+    vector<int> bit;  // binary indexed tree
+    int n;
+
+    FenwickTreeOneBasedIndexing(int n) {
+        this->n = n + 1;
+        bit.assign(n + 1, 0);
+    }
+
+    FenwickTreeOneBasedIndexing(vector<int> a)
+        : FenwickTreeOneBasedIndexing(a.size()) {
+        for (size_t i = 0; i < a.size(); i++)
+            add(i, a[i]);
+    }
+
+    int sum(int idx) {
+        int ret = 0;
+        for (++idx; idx > 0; idx -= idx & -idx)
+            ret += bit[idx];
+        return ret;
+    }
+
+    int sum(int l, int r) {
+        return sum(r) - sum(l - 1);
+    }
+
+    void add(int idx, int delta) {
+        for (++idx; idx < n; idx += idx & -idx)
+            bit[idx] += delta;
+    }
+};
+
+// Range updates and point queries (1-based indexing)
+void add(int idx, int val) {
+    for (++idx; idx < n; idx += idx & -idx)
+        bit[idx] += val;
+}
+
+void range_add(int l, int r, int val) {
+    add(l, val);
+    add(r + 1, -val);
+}
+
+int point_query(int idx) {
+    int ret = 0;
+    for (++idx; idx > 0; idx -= idx & -idx)
+        ret += bit[idx];
+    return ret;
+}
+
+
+// Range updates and Range Queries
+def add(b, idx, x):
+    while idx <= N:
+        b[idx] += x
+        idx += idx & -idx
+
+def range_add(l,r,x):
+    add(B1, l, x)
+    add(B1, r+1, -x)
+    add(B2, l, x*(l-1))
+    add(B2, r+1, -x*r)
+
+def sum(b, idx):
+    total = 0
+    while idx > 0:
+        total += b[idx]
+        idx -= idx & -idx
+    return total
+
+def prefix_sum(idx):
+    return sum(B1, idx)*idx -  sum(B2, idx)
+
+def range_sum(l, r):
+    return prefix_sum(r) - prefix_sum(l-1)

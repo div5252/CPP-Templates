@@ -1,4 +1,4 @@
-const int MOD=1000000007;
+const int MOD = 1000000007;
 
 ll POW(ll a,ll b)
 {
