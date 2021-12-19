@@ -39,20 +39,6 @@ for (int i = 0; i < V; i++) // for each vertex i in [0..V-1]
         printf("CC %d:", ++numCC), dfs(i), printf("\n"); // 3 lines here!
 
 
-//Flood fill
-int dr[] = {1,1,0,-1,-1,-1, 0, 1};
-int dc[] = {0,1,1, 1, 0,-1,-1,-1};  // S,SE,E,NE,N,NW,W,SW neighbors
-int floodfill(int r, int c, char c1, char c2) {     // returns the size of CC
-    if (r < 0 || r >= R || c < 0 || c >= C) return 0;   // outside grid
-    if (grid[r][c] != c1) return 0;     // does not have color c1
-    int ans = 1;    // adds 1 to ans because vertex (r, c) has c1 as its color
-    grid[r][c] = c2; // now recolors vertex (r, c) to c2 to avoid cycling!
-    for (int d = 0; d < 8; d++)
-        ans += floodfill(r + dr[d], c + dc[d], c1, c2);
-    return ans; // the code is neat due to dr[] and dc[]
-}
-
-
 //Topological sort
 vi ts; // global vector to store the toposort in reverse order
 void dfs2(int u) {
@@ -84,12 +70,15 @@ while (!q.empty() && isBipartite)
 {
     int u = q.front(); q.pop();
     for (int j = 0; j < (int)AdjList[u].size(); j++) {
-        ii v = AdjList[u][j];
+        ll v = AdjList[u][j];
         if (color[v.first] == INF) {
             color[v.first] = 1 - color[u];
             q.push(v.first); }
         else if (color[v.first] == color[u]) {
-            isBipartite = false; break; } } }
+            isBipartite = false; break; 
+        } 
+    } 
+}
 
 
 //Graph edges property
@@ -160,16 +149,19 @@ void tarjanSCC(int u) {
         if (dfs_num[v.first] == UNVISITED)
             tarjanSCC(v.first);
         if (visited[v.first])   // condition for update
-            dfs_low[u] = min(dfs_low[u], dfs_low[v.first]); }
+            dfs_low[u] = min(dfs_low[u], dfs_low[v.first]); 
+    }
 
     if (dfs_low[u] == dfs_num[u]) {     // if this is a root (start) of an SCC
         printf("SCC %d:", ++numSCC);    // this part is done after recursion
         while (1) {
             int v = S.back(); S.pop_back(); visited[v] = 0;
             printf(" %d", v);
-            if (u == v) break; }
+            if (u == v) break; 
+        }
         printf("\n");
-} }
+    } 
+}
 // inside int main()
     dfs_num.assign(V, UNVISITED); dfs_low.assign(V, 0); visited.assign(V, 0);
     dfsNumberCounter = numSCC = 0;
@@ -183,7 +175,8 @@ void tarjanSCC(int u) {
 vector< pair<int, ii> > EdgeList; // (weight, two vertices) of the edge
 for (int i = 0; i < E; i++) {
     scanf("%d %d %d", &u, &v, &w); // read the triple: (u, v, w)
-    EdgeList.push_back(make_pair(w, ii(u, v))); } // (w, u, v)
+    EdgeList.push_back(make_pair(w, ii(u, v))); // (w, u, v)
+} 
 sort(EdgeList.begin(), EdgeList.end());
 int mst_cost = 0;
 UnionFind UF(V); // all V are disjoint sets initially
@@ -192,7 +185,8 @@ for (int i = 0; i < E; i++) { // for each edge, O(E)
     if (!UF.isSameSet(front.second.first, front.second.second)) { // check
         mst_cost += front.first; // add the weight of e to MST
         UF.unionSet(front.second.first, front.second.second); // link them
-} }
+    } 
+}
 
 
 //Prim-MST
@@ -249,11 +243,14 @@ printPath(t), printf("\n"); // addition: call printPath from vertex t
 
 
 //Dijkstra
-vi dist(V, INF); dist[s] = 0;
-priority_queue< pair<ll,ll>, vector<pair<ll,ll> >, greater<pair<ll,ll> > > pq; pq.push(make_pair(0, s));
+vi dist(V, INF); 
+dist[s] = 0;
+priority_queue< pair<ll,ll>, vector<pair<ll,ll> >, greater<pair<ll,ll> > > pq; 
+pq.push(make_pair(0, s));
 while (!pq.empty())
 {
-    pair<ll,ll> front = pq.top(); pq.pop();
+    pair<ll,ll> front = pq.top(); 
+    pq.pop();
     ll d = front.first, u = front.second;
     if (d > dist[u]) continue;
     for (int j = 0; j < (int)AdjList[u].size(); j++)
@@ -303,12 +300,13 @@ for (int i = 0; i < V - 1; i++) // relax all E edges V-1 times
             dist[v.first] = min(dist[v.first], dist[u] + v.second); // relax
         }
 bool hasNegativeCycle = false;
-for (int u = 0; u < V; u++) // one more pass to check
+for (int u = 0; u < V; u++) {// one more pass to check
     for (int j = 0; j < (int)AdjList[u].size(); j++) {
         pair<ll,ll> v = AdjList[u][j];
         if (dist[v.first] > dist[u] + v.second) // if this is still possible
             hasNegativeCycle = true; // then negative cycle exists!
     }
+}
 printf("Negative Cycle Exist? %s\n", hasNegativeCycle ? "Yes" : "No");
 
 
